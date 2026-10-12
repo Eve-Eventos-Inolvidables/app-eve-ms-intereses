@@ -36,6 +36,20 @@ public class UserInterestService extends UpdatableService<
     }
 
     @Override
+    public UserInterestDto update(Long id, UserInterestBaseDto dto) {
+        log.info("Actualizando interés id={}", id);
+        return super.update(id, dto);
+    }
+
+    @Override
+    public boolean delete(Long id) {
+        log.info("Archivando interés id={}", id);
+        boolean deleted = super.delete(id);
+        log.debug("Resultado del borrado lógico id={}: {}", id, deleted);
+        return deleted;
+    }
+
+    @Override
     public Specification<UserInterest> toSpecification(UserInterestFilter filter) {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();

@@ -16,7 +16,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RestController
 @RequestMapping("/user-interests")
 public class UserInterestController extends
@@ -29,12 +31,14 @@ public class UserInterestController extends
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public Response<UserInterestDto> create(@RequestBody UserInterestBaseDto dto) {
+        log.info("POST /user-interests userId={} categoryId={}", dto.getUserId(), dto.getCategoryId());
         return ResponseFactory.resourceCreated(service.create(dto));
     }
 
     @PutMapping("/{id}")
     public Response<UserInterestDto> update(@PathVariable Long id,
                                             @RequestBody UserInterestBaseDto dto) {
+        log.info("PUT /user-interests/{}", id);
         return ResponseFactory.ok(service.update(id, dto));
     }
 }
