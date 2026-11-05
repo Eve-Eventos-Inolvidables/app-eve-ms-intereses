@@ -83,7 +83,7 @@ public class SecurityConfig {
     @Bean
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
-                .addServersItem(new Server().url("/app-eve-ms-intereses").description("Ruta vía API Gateway"))
+                .addServersItem(new Server().url("/app-eve-ms-userinterests").description("Ruta vía API Gateway"))
                 .addSecurityItem(new SecurityRequirement().addList("BearerAuth"))
                 .components(new Components()
                         .addSecuritySchemes("BearerAuth",
