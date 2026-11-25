@@ -54,13 +54,13 @@ public class SecurityConfig {
     @Value("${jwt.clock-skew-seconds:0}")
     private long clockSkewSeconds;
 
-    @Value("${jwt.claim.roles}")
+    @Value("${jwt.claim.roles:role}")
     private String rolesClaim;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .cors(Customizer.withDefaults())
+                // El API Gateway ya se encarga de CORS
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
@@ -71,6 +71,7 @@ public class SecurityConfig {
 
         http
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         .requestMatchers(HttpMethod.DELETE, "/api/user-interests/**").hasRole("ADMINISTRADOR")
                         .anyRequest().authenticated())
@@ -111,13 +112,24 @@ public class SecurityConfig {
     private JwtAuthenticationConverter authenticationConverter() {
         JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
         converter.setJwtGrantedAuthoritiesConverter(jwt -> {
-            List<String> roles = jwt.getClaimAsStringList(rolesClaim);
-            if (roles == null) {
-                return List.<GrantedAuthority>of();
+            Object claim = jwt.getClaim(rolesClaim);
+            if (claim == null) claim = jwt.getClaim("role");
+            if (claim == null) claim = jwt.getClaim("roles");
+
+            if (claim instanceof List<?> list) {
+                return list.stream()
+                        .map(Object::toString)
+                        .<GrantedAuthority>map(r -> new SimpleGrantedAuthority("ROLE_" + r.toUpperCase()))
+                        .toList();
             }
-            return roles.stream()
-                    .<GrantedAuthority>map(r -> new SimpleGrantedAuthority("ROLE_" + r.toUpperCase()))
-                    .toList();
+
+            if (claim instanceof String str && !str.isBlank()) {
+                return List.<GrantedAuthority>of(
+                        new SimpleGrantedAuthority("ROLE_" + str.toUpperCase())
+                );
+            }
+
+            return List.<GrantedAuthority>of();
         });
         return converter;
     }

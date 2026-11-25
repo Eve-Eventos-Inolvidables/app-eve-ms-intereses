@@ -33,14 +33,14 @@ public class UserInterestController extends
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("hasAnyRole('ADMINISTRADOR','CLIENTE')")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'CLIENTE')")
     public Response<UserInterestDto> create(@RequestBody UserInterestBaseDto dto) {
         log.info("POST /user-interests userId={} categoryId={}", dto.getUserId(), dto.getCategoryId());
         return ResponseFactory.resourceCreated(service.create(dto));
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMINISTRADOR','CLIENTE')")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'CLIENTE')")
     public Response<UserInterestDto> update(@PathVariable Long id,
                                             @RequestBody UserInterestBaseDto dto) {
         log.info("PUT /user-interests/{}", id);
